@@ -8,15 +8,15 @@ messages, process them and push the results out to their respective reply
 queues, a `send` module to send messages to servies and a `poll` module to poll
 or wait for results.
 
-### echoworker
+### echoservice
 ```bash
-python -m toyrabbit.echoworker
+python -m toyrabbit.echoservice
 ```
 It just echoes whatever message you send.
 
-### opworker
+### opservice
 ```bash
-python -m toyrabbit.opworker
+python -m toyrabbit.opservice
 ```
 Will do simple mathemetical calculations. Expects JSON in the format:
 ```json
