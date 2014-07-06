@@ -20,9 +20,9 @@ python -m toyrabbit.opworker
 ```
 Will do simple mathemetical calculations. Expects JSON in the format:
 ```json
-['<operator>', [<int>, <int>]]
+["<operator>", [<int>, <int>]]
 ```
-Where the left side is one of `'*'` `'+'` `'/'` `'-'` and the right side is
+Where the left side is one of `"*"` `"+"` `"/"` `"-"` and the right side is
 a 2-tup of integer arguments.
 
 ### send
