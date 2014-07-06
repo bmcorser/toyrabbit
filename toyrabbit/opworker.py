@@ -11,13 +11,12 @@ O = {
 
 
 def op(body):
-    print(" [x] Received: {0}".format(body))
+    print("received: {0}".format(body))
     sym, args = json.loads(body)
-    return O[sym](*args)
+    return O[sym](*map(float, args))
 
 bus = MessageBus()
 route, queue, reply_route = bus.add_service_worker(op)
-fmt_string = " [*] service_route({0})"\
-                        " --> worker_queue({1}) --> reply_route({2})"
+fmt_string = "service_route({0}) --> worker_queue({1}) --> reply_route({2})"
 print fmt_string.format(route, queue, reply_route)
 bus.channel.start_consuming()

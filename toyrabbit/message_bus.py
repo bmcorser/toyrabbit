@@ -34,7 +34,8 @@ class MessageBus(object):
         return "{0}.reply".format(func.__name__)
 
     def add_service_worker(self, func):
-        worker_queue = self.channel.queue_declare(exclusive=True).method.queue
+        service_queue = func.__name__
+        self.channel.queue_declare(service_queue)
 
         reply = self.func_reply(func)
         self.channel.queue_declare(reply)
@@ -46,23 +47,27 @@ class MessageBus(object):
         self.channel.queue_bind(**reply_queue_bind)
 
         def service(channel, method, properties, body):
+            reply_properties = {
+                'correlation_id': properties.correlation_id,
+                'delivery_mode': 2,
+            }
             publish_params = {
                 'exchange': self.exchange_params['exchange'],
                 'routing_key': reply,
-                'properties': Props(correlation_id=properties.correlation_id),
+                'properties': Props(**reply_properties),
                 'body': json.dumps(func(body)),
             }
             channel.basic_publish(**publish_params)
             channel.basic_ack(delivery_tag=method.delivery_tag)
 
-        worker_queue_bind = {
-            'queue': worker_queue,
+        service_queue_bind = {
+            'queue': service_queue,
             'exchange': self.exchange_params['exchange'],
             'routing_key': func.__name__,
         }
-        self.channel.queue_bind(**worker_queue_bind)
-        self.channel.basic_consume(service, queue=worker_queue)
-        return func.__name__, worker_queue, reply
+        self.channel.queue_bind(**service_queue_bind)
+        self.channel.basic_consume(service, queue=service_queue)
+        return func.__name__, service_queue, reply
 
     def receive(self, service, correlation_id):
         reply = self.service_reply(service)
@@ -70,10 +75,8 @@ class MessageBus(object):
         def correlate(channel, method, properties, body):
             if properties.correlation_id == correlation_id:
                 self.result = body
-            channel.basic_ack(delivery_tag=method.delivery_tag)
 
-
-        self.channel.basic_consume(correlate, queue=reply)
+        self.channel.basic_consume(correlate, queue=reply, no_ack=True)
 
     def publish(self, service, body):
         correlation_id = str(uuid4())
