@@ -5,7 +5,8 @@ A tiny and very unstable message bus in Python that uses RabbitMQ.
 
 There are two worker modules which run little services that sit and listen for
 messages, process them and push the results out to their respective reply
-queues, a `send` module to send messages to servies
+queues, a `send` module to send messages to servies and a `poll` module to poll
+or wait for results.
 
 ### echoworker
 ```bash
